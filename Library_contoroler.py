@@ -16,6 +16,7 @@ cur.execute(
         name VARCHAR,
         author_id INTEGER,
         enrollment_date VARCHAR,
+        author_name VARCHAR,
         FOREIGN KEY (author_id) REFERENCES authors (id)
         
     )"""
@@ -28,14 +29,6 @@ cur.execute(
     )"""
 )
 
-cur.execute(
-
-    """CREATE TABLE IF NOT EXISTS vaset (
-        vaset_id INTEGER PRIMARY KEY,    
-        author_name INTEGER,                
-        book_name INTEGER                   
-    )"""
-)
 
 
 db.commit()
@@ -46,11 +39,6 @@ class Book :
        name_book = input("name book : ")
        author_id = input("author id : ")
        enrollment_date = input("enrollment date : ")
-       cur.execute(
-            """INSERT INTO books(name,author_id,enrollment_date) VALUES(?,?,?)""",(name_book,author_id,enrollment_date)                                       
-        )
-       
-       db.commit()
        
        try:
             cur.execute(
@@ -58,13 +46,14 @@ class Book :
                 )
             author = cur.fetchone()
             author_name = author[0]
-
-            cur.execute(
-                    """INSERT INTO vaset(author_name,book_name) VALUES(?,?)""",(author_name,name_book)                                       
-                )
             
             db.commit()
 
+            cur.execute(
+                    """INSERT INTO books(name,author_id,enrollment_date,author_name) VALUES(?,?,?,?)""",(name_book,author_id,enrollment_date,author_name)                                       
+                )
+            
+            db.commit()
        except:
            print("not fond author , plaese chek author id in author list and tray again")
 
@@ -75,7 +64,9 @@ class Book :
                 print(row)
                 print("\n\n")
 
-
+           cur.execute("DELETE FROM books WHERE id =?",(name_book,))
+           db.commit()
+            
    def Edit(self) :
         
         id = input(" enter book_id for Edit :\n")
@@ -121,8 +112,7 @@ class Book :
                 print("\nauthor list\n")
                 print(row)
                 print("\n\n")       
-
-    
+ 
    def Delete(self):
 
         id = input(" enter book id for deleted : \n")
@@ -150,8 +140,6 @@ class Author :
         )
         db.commit()
 
-
-
     def Edit(self):
         
         id = input(" enter author_id for Edit :\n")
@@ -161,12 +149,14 @@ class Author :
             "UPDATE authors SET name=? WHERE id =?",(new_name,id)
         )
 
-
     def Delete(self):
 
         id = input(" enter auther id for deleted : \n")
 
         cur.execute("DELETE FROM authors WHERE id =?",(id,))
+        db.commit()
+
+        cur.execute("DELETE FROM books WHERE author_id =?",(id,))
         db.commit()
 
     def View(self):
@@ -190,7 +180,6 @@ class Member :
         )
         db.commit()
 
-
     def Edit(self):
         
         id = input(" enter member_id for Edit :\n")
@@ -200,14 +189,12 @@ class Member :
             "UPDATE members SET name=? WHERE id =?",(new_name,id)
         )
 
-
     def Delete(self):
 
         id = input(" enter member id for deleted : \n")
 
         cur.execute("DELETE FROM members WHERE id =?",(id,))
         db.commit()
-
 
     def View(self):
 
